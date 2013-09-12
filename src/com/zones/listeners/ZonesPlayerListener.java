@@ -6,14 +6,19 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.LeashHitch;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.PoweredMinecart;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.StorageMinecart;
+import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.entity.minecart.PoweredMinecart;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -25,7 +30,10 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -283,7 +291,8 @@ public class ZonesPlayerListener implements Listener {
             Material.COMMAND.getId(),
             Material.ANVIL.getId(),
             Material.TRAPPED_CHEST.getId(),
-            Material.DROPPER.getId()
+            Material.DROPPER.getId(),
+            Material.HOPPER.getId()
         );
     
     @EventHandler(ignoreCancelled = true)
@@ -438,19 +447,49 @@ public class ZonesPlayerListener implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity target = event.getRightClicked();
-        if(target == null) return;
+        if(target == null) {
+            return;
+        }
         
-        if(target instanceof Sheep) {
+        // Don't allow leashing without hit rights.
+        if(player.getItemInHand() != null && 
+                player.getItemInHand().getTypeId() == Material.LEASH.getId() &&
+                target instanceof Animals) {
             ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
-            if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, target, -1)){
-                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_SHEAR_IN_ZONE, player);
+            if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.HIT)){
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
                 event.setCancelled(true);
                 return;
             }
-        } else if (target instanceof StorageMinecart) {
+        }
+        
+        if (target instanceof StorageMinecart || target instanceof HopperMinecart) {
             ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
             if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
                 zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
+            }
+        } else if (target instanceof Horse) {
+            if (player.isSneaking()) {
+                ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+                if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
+                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+                    event.setCancelled(true);
+                    return;
+                }
+            } else {
+                ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+                if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.HIT)){
+                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        } else if (target instanceof LeashHitch) {
+            ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+            if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.HIT)){
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
                 event.setCancelled(true);
                 return;
             }
@@ -461,6 +500,42 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
+        }
+    }
+    
+    @EventHandler(ignoreCancelled = true) 
+    public void onInventoryOpen(InventoryOpenEvent event) {
+        Player player = (Player) event.getPlayer();
+        Inventory inventory = event.getInventory();
+        InventoryHolder holder = inventory.getHolder();
+        if(holder.equals(player)) {
+            return;
+        }
+        if(holder instanceof Entity) {
+            Entity entity = (Entity) holder;
+            ZoneBase zone = plugin.getWorldManager(entity.getWorld()).getActiveZone(entity.getLocation());
+            if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
+            }
+        } else if (holder instanceof BlockState) {
+            BlockState state = (BlockState) holder;
+            EventUtil.onModify(plugin, event, player, state.getBlock(), state.getTypeId());
+        }
+        
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onShearSheep(PlayerShearEntityEvent event) {
+        Player player = event.getPlayer();
+        Entity target = event.getEntity();
+        
+        ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, target, -1)){
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_SHEAR_IN_ZONE, player);
+            event.setCancelled(true);
+            return;
         }
     }
 }
