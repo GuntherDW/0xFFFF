@@ -9,6 +9,8 @@ public enum AccessResolver {
     SNOW_MELT(BlockResolver.class),
     ICE_FORM(BlockResolver.class),
     ICE_MELT(BlockResolver.class),
+    ENDERMAN(BlockResolver.class),
+    MOBSFRIENDLYFIRE(BlockResolver.class),
     MUSHROOM_SPREAD(BlockResolver.class),
     PHYSICS(BlockResolver.class),
     WATER_FLOW(BlockFromToResolver.class),

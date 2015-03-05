@@ -1,6 +1,7 @@
 package com.zones.permissions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -9,7 +10,8 @@ import com.nijiko.permissions.Group;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijiko.permissions.User;
 
-public class NijiPermissions extends Permissions {
+public class
+    NijiPermissions extends Permissions {
 
     private final com.nijikokun.bukkit.Permissions.Permissions plugin;
     
@@ -46,17 +48,24 @@ public class NijiPermissions extends Permissions {
      * I seriously couldn't find a more efficient way.
      * /sadface
      */
-    public List<String> getGroups(String world, String playername) {
-        User u = getHandler().getUserObject(world, playername);
+    public List<String> getGroups(String targetWorld, String playername) {
+
         List<String> groups = new ArrayList<String>();
+        User u = getHandler().getUserObject(targetWorld, playername);
+
+
         if(u == null) return groups;
+        String world = u.getWorld();
         LinkedHashSet<Entry> ancestors = u.getAncestors();
         if(ancestors == null) return groups;
-        for(Entry e : ancestors)
-            if(e.getWorld().equals(world))
+        for(Entry e : ancestors) {
+            if(e.getWorld().equals(world)) {
                 groups.add(e.getName().toLowerCase());
+            }
+        }
         
         return groups;
+
         //return getHandler().getGroups(player.getWorld().getName(), player.getName());
     }
 

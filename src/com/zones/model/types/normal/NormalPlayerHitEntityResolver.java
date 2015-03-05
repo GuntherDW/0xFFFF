@@ -14,7 +14,7 @@ public class NormalPlayerHitEntityResolver implements PlayerHitEntityResolver{
 
     @Override
     public void sendDeniedMessage(ZoneBase zone, Player player) {
-        zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+        zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITIES_IN_ZONE, player);
     }
 
     @Override

@@ -24,6 +24,7 @@ public class SettingsCommands extends CommandsBase {
     
     public SettingsCommands(Zones plugin) {
         super(plugin);
+        toggles.put("mobsfriendlyfire", new Object[] { "zones.toggle.mobsfriendlyfire", "MobsFriendlyFire", ZoneVar.MOBSFRIENDLYFIRE } );
         toggles.put("dynamite" ,        new Object[] { "zones.toggle.tnt", "Dynamite", ZoneVar.DYNAMITE } );
         toggles.put("tnt",              new Object[] { "zones.toggle.tnt", "Tnt", ZoneVar.DYNAMITE } );
         toggles.put("food",             new Object[] { "zones.toggle.food", "Food", ZoneVar.FOOD });
@@ -49,7 +50,7 @@ public class SettingsCommands extends CommandsBase {
         toggles.put("crop",             new Object[] { "zones.toggle.crop", "Crop protection", ZoneVar.CROP_PROTECTION });
         toggles.put("enderman",         new Object[] { "zones.toggle.enderman", "Enderman Griefing", ZoneVar.ENDER_GRIEFING });
         toggles.put("inheritgroups",    new Object[] { "zones.toggle.inheritgroup", "Inherit Group", ZoneVar.INHERIT_GROUP });
-        
+
         lists.put("place", ZoneVar.PLACE_BLOCKS);
         lists.put("protectedplace", ZoneVar.PLACE_BLOCKS);
         lists.put("break", ZoneVar.BREAK_BLOCKS);
@@ -94,8 +95,19 @@ public class SettingsCommands extends CommandsBase {
             player.sendMessage(ChatColor.RED + "Usage: /zset [variable name] [value]");
             return;
         }
-        
+
         ZoneBase zone = getSelectedZone(player);
+
+        /**
+         * Check for permissions!
+         */
+        if( v.isRestricted() ) {
+            if(!plugin.getPermissions().canUse(player.getName(), zone.getWorld().getName(), "zones.toggle."+v.getName())) {
+                player.sendMessage(ChatColor.RED + "You're not allowed to change this variable.");
+                return;
+            }
+        }
+
         if(params.length > 1 && params[1].trim().equalsIgnoreCase("reset")) {
             zone.getSettings().set(v, null);
             zone.saveSettings();
@@ -287,6 +299,7 @@ public class SettingsCommands extends CommandsBase {
             return;
         }
         Object[] variable = toggles.get(params[0].toLowerCase());
+        System.out.println("Checking for "+variable[0]);
         if(!canUseCommand(player,((String)variable[0]))) {
             player.sendMessage(ChatColor.RED + "You're not allowed to change this variable.");
         } else {

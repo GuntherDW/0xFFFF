@@ -3,6 +3,7 @@ package com.zones.listeners;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
@@ -40,12 +41,16 @@ public class ZonesVehicleListener implements Listener {
 
         ZoneBase zone = plugin.getWorldManager(player).getActiveZone(event.getVehicle().getLocation());
         if (zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, event.getVehicle(), -1)) {
-            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITIES_IN_ZONE, player);
+            event.setCancelled(true);
+        }
+        if (zone != null && event.getVehicle() instanceof StorageMinecart && !((PlayerHitEntityResolver) zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, event.getVehicle(), -1)) {
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_CHEST_IN_ZONE, player);
             event.setCancelled(true);
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onVehicleMove(VehicleMoveEvent event) {
         Entity entity = event.getVehicle().getPassenger();
         if (entity == null || !(entity instanceof Player))
@@ -73,7 +78,7 @@ public class ZonesVehicleListener implements Listener {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                     //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     event.getVehicle().eject();
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    player.sendMessage(ZonesConfig.PLAYER_ILLEGAL_POSITION);
                     return;
                 } 
                 player.teleport(from);
@@ -85,7 +90,7 @@ public class ZonesVehicleListener implements Listener {
                         event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         event.getVehicle().eject();
-                        player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                        player.sendMessage(ZonesConfig.PLAYER_ILLEGAL_POSITION);
                         return;
                     }
                     player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
@@ -98,7 +103,7 @@ public class ZonesVehicleListener implements Listener {
             if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    player.sendMessage(ZonesConfig.PLAYER_ILLEGAL_POSITION);
                     //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     event.getVehicle().eject();
                     return;

@@ -3,16 +3,12 @@ package com.zones.listeners;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LeashHitch;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.entity.minecart.PoweredMinecart;
 import org.bukkit.entity.minecart.StorageMinecart;
@@ -49,6 +45,7 @@ import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneSelection;
 import com.zones.selection.ZoneSelection.Confirm;
+import org.bukkit.material.EnderChest;
 
 
 /**
@@ -118,7 +115,7 @@ public class ZonesPlayerListener implements Listener {
                  * This prevents players getting stuck ;).
                  */
                 if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    player.sendMessage(ZonesConfig.PLAYER_ILLEGAL_POSITION);
                     player.teleport(from.getWorld().getSpawnLocation());
                     event.setCancelled(false);
                     //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
@@ -130,13 +127,34 @@ public class ZonesPlayerListener implements Listener {
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
-                        player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                        player.sendMessage(ZonesConfig.PLAYER_ILLEGAL_POSITION);
+                        for(Entity ent : player.getWorld().getChunkAt(player.getLocation()).getEntities()) {
+                            // Entity passenger;
+                            if(ent.getPassenger() != null && ent.getPassenger().equals(player)) {
+                                // ent.eject();
+                                ent.teleport(from.getWorld().getSpawnLocation());
+                                ent.eject();
+                                event.setCancelled(false);
+                                return;
+                            }
+                        }
                         player.teleport(from.getWorld().getSpawnLocation());
                         event.setCancelled(false);
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
                     }
                     player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
+                    // Check for vehicles?
+                    for(Entity ent : player.getWorld().getChunkAt(player.getLocation()).getEntities()) {
+                        // Entity passenger;
+                        if(ent.getPassenger() != null && ent.getPassenger().equals(player)) {
+                            // ent.eject();
+                            ent.teleport(from);
+                            ent.eject();
+                            event.setCancelled(false);
+                            return;
+                        }
+                    }
                     player.teleport(from);
                     event.setCancelled(false);
                     
@@ -153,13 +171,32 @@ public class ZonesPlayerListener implements Listener {
                          )
                             
                    ) {
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION); 
+                    player.sendMessage(ZonesConfig.PLAYER_ILLEGAL_POSITION);
+                    for(Entity ent : player.getWorld().getChunkAt(player.getLocation()).getEntities()) {
+                        // Entity passenger;
+                        if(ent.getPassenger() != null && ent.getPassenger().equals(player)) {
+                            ent.teleport(from.getWorld().getSpawnLocation());
+                            ent.eject();
+                            event.setCancelled(false);
+                            return;
+                        }
+                    }
                     player.teleport(from.getWorld().getSpawnLocation());
                     event.setCancelled(false);
                     //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
                 }
                 player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
+                for(Entity ent : player.getWorld().getChunkAt(player.getLocation()).getEntities()) {
+                    // Entity passenger;
+                    if(ent.getPassenger() != null && ent.getPassenger().equals(player)) {
+                        // ent.eject();
+                        ent.teleport(from);
+                        ent.eject();
+                        event.setCancelled(false);
+                        return;
+                    }
+                }
                 player.teleport(from);
                 event.setCancelled(false);
                 return;
@@ -333,7 +370,7 @@ public class ZonesPlayerListener implements Listener {
                         }
                     } else {
                         if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, event.getClickedBlock(), blockType)) {
-                            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+                            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITIES_IN_ZONE, player);
                             event.setCancelled(true);
                             return;
                         }
@@ -478,6 +515,8 @@ public class ZonesPlayerListener implements Listener {
             EventUtil.onEntityHit(plugin, event, player, target);
         } else if (target instanceof PoweredMinecart && player.getItemInHand() != null && player.getItemInHand().getTypeId() == 263) {
             EventUtil.onEntityHit(plugin, event, player, target);
+        } else if (target instanceof ArmorStand) {
+            EventUtil.onEntityHit(plugin, event, player, target);
         }
     }
     
@@ -485,6 +524,10 @@ public class ZonesPlayerListener implements Listener {
     public void onInventoryOpen(InventoryOpenEvent event) {
         Player player = (Player) event.getPlayer();
         Inventory inventory = event.getInventory();
+
+        if(inventory.getHolder() == null)
+            return;
+
         InventoryHolder holder = inventory.getHolder();
         if(holder.equals(player)) {
             return;

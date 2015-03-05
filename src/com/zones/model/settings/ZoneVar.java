@@ -10,7 +10,7 @@ import com.zones.model.ZoneBase;
 public enum ZoneVar {
     
     
-        TELEPORT("TeleportEnabled", Serializer.BOOLEAN) {
+        TELEPORT("TeleportEnabled", Serializer.BOOLEAN, true) {
             @Override
             public Object getDefault(ZoneBase zone) {return true;}
         },
@@ -40,7 +40,7 @@ public enum ZoneVar {
                 return zone.getWorldConfig().PLAYER_FOOD_ENABLED;
             }
         },
-        HEALTH("HealthEnabled", Serializer.BOOLEAN) {
+        HEALTH("HealthEnabled", Serializer.BOOLEAN, true) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 return zone.getWorldConfig().PLAYER_HEALTH_ENABLED && !(zone.getWorldConfig().GOD_MODE_ENABLED && zone.getWorldConfig().GOD_MODE_AUTOMATIC);
@@ -50,6 +50,12 @@ public enum ZoneVar {
             @Override
             public Object getDefault(ZoneBase zone) {
                 return zone.getWorldConfig().DYNAMITE_ENABLED;
+            }
+        },
+        ENDERMAN("Endermen", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().ENDERMAN_ENABLED;
             }
         },
         PHYSICS("PhysicsEnabled", Serializer.BOOLEAN) {
@@ -131,6 +137,10 @@ public enum ZoneVar {
                 return zone.getWorldConfig().GRASS_GROWTH_ENABLED;
             }
         },
+        MOBSFRIENDLYFIRE("MobsFriendlyFire", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return true;}
+        },
         TREE_GROWTH("TreeGrowth", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
@@ -196,9 +206,17 @@ public enum ZoneVar {
         
         private final String name;
         private final Serializer serializer;
+        private final boolean restricted;
         private ZoneVar(String name, Serializer serializer) {
             this.name = name;
             this.serializer = serializer;
+            this.restricted = false;
+        }
+
+        private ZoneVar(String name, Serializer serializer, boolean restricted) {
+            this.name = name;
+            this.serializer = serializer;
+            this.restricted = restricted;
         }
         
         public String getName() { return name; }
@@ -208,7 +226,10 @@ public enum ZoneVar {
         public String serialize(Object data) { return serializer.serialize(data); }
         public abstract Object getDefault(ZoneBase zone);
         
-        
+        public boolean isRestricted() {
+            return this.restricted;
+        }
+
         public static ZoneVar fromName(String name) {
             return names.get(name);
         }

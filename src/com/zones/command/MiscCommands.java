@@ -23,7 +23,7 @@ public class MiscCommands extends CommandsBase {
     
     @Command(
         name = "god",
-        description = "Toggles you're godmode.",
+        description = "Toggles your godmode.",
         requiresPlayer = true,
         requiredPermission = "zones.god"
     )
@@ -39,7 +39,7 @@ public class MiscCommands extends CommandsBase {
     
     @Command(
         name = "ungod",
-        description = "Disables you're godmode.",
+        description = "Disables your godmode.",
         requiresPlayer = true,
         requiredPermission = "zones.god"
     )

@@ -3,19 +3,18 @@ package com.zones.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.session.SessionManager;
+import com.sk89q.worldedit.world.World;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.LocalPlayer;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
-import com.sk89q.worldedit.regions.CuboidRegionSelector;
-import com.sk89q.worldedit.regions.CylinderRegionSelector;
-import com.sk89q.worldedit.regions.Polygonal2DRegionSelector;
-import com.sk89q.worldedit.regions.SphereRegionSelector;
+import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
+import com.sk89q.worldedit.regions.selector.CylinderRegionSelector;
+import com.sk89q.worldedit.regions.selector.Polygonal2DRegionSelector;
+import com.sk89q.worldedit.regions.selector.SphereRegionSelector;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
@@ -147,9 +146,10 @@ public class WorldeditCommands extends CommandsBase {
             return;
         }
         
-        LocalPlayer localPlayer = getPlugin().getWorldEdit().wrapPlayer(player);
-        LocalSession local = getPlugin().getWorldEdit().getWorldEdit().getSession(localPlayer);
-        LocalWorld localWorld = localPlayer.getWorld();
+        BukkitPlayer localPlayer = getPlugin().getWorldEdit().wrapPlayer(player);
+        SessionManager manager = getPlugin().getWorldEdit().getWorldEdit().getSessionManager();
+        LocalSession local = manager.getIfPresent(localPlayer);
+        World localWorld = localPlayer.getWorld();
         
         ZoneBase zone = getSelectedZone(player);
         ZoneForm form = zone.getForm();
@@ -157,8 +157,8 @@ public class WorldeditCommands extends CommandsBase {
             CuboidRegionSelector cuboid = new CuboidRegionSelector(localWorld);
             Vector pt1 = new Vector(form.getLowX(),form.getLowZ(),form.getLowY());
             Vector pt2 = new Vector(form.getHighX(),form.getHighZ(),form.getHighY());
-            cuboid.selectPrimary(pt1);
-            cuboid.selectSecondary(pt2);
+            cuboid.selectPrimary(pt1, null);
+            cuboid.selectSecondary(pt2, null);
             
             local.setRegionSelector(localWorld, cuboid);
             local.dispatchCUISelection(localPlayer);
@@ -191,8 +191,8 @@ public class WorldeditCommands extends CommandsBase {
             ZoneSphere sphere = (ZoneSphere) form; 
             
             SphereRegionSelector spheresel = new SphereRegionSelector(localWorld);
-            spheresel.selectPrimary(new Vector(sphere.getCenterX(), sphere.getCenterZ(), sphere.getCenterY()));
-            spheresel.selectSecondary(new Vector(sphere.getCenterX() + sphere.getRadius(), sphere.getCenterZ() + sphere.getRadius(), sphere.getCenterY() + sphere.getRadius()));
+            spheresel.selectPrimary(new Vector(sphere.getCenterX(), sphere.getCenterZ(), sphere.getCenterY()), null);
+            spheresel.selectSecondary(new Vector(sphere.getCenterX() + sphere.getRadius(), sphere.getCenterZ() + sphere.getRadius(), sphere.getCenterY() + sphere.getRadius()), null);
             
             local.setRegionSelector(localWorld, spheresel);
             local.dispatchCUISelection(localPlayer);

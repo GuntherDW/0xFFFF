@@ -38,12 +38,15 @@ public class WorldConfig {
     
     public boolean BORDER_ENABLED;
     public int BORDER_RANGE;
+    public int BORDER_RANGE_X;
+    public int BORDER_RANGE_Z;
     public int BORDER_TYPE;
     public boolean BORDER_USE_SPAWN;
     public ZoneVertice BORDER_ALTERNATE_CENTER;
     
     public boolean BORDER_ENFORCE;
     public boolean BORDER_OVERRIDE_ENABLED;
+    public boolean ENDERMAN_ENABLED;
     
     public boolean DYNAMITE_ENABLED;
     public int DYNAMITE_RANGE;
@@ -173,14 +176,23 @@ public class WorldConfig {
     public Permissions getPermissions() {
         return manager.getPlugin().getPermissions();
     }
-    
+
+    public int getBorderType(String config) {
+        if(config.equalsIgnoreCase("CUBOID"))    return 1;
+        if(config.equalsIgnoreCase("CIRCULAR"))  return 2;
+        if(config.equalsIgnoreCase("RECTANGLE")) return 3;
+        return 1;
+    }
+
     public void load() {
         try {
             ExtendedProperties p = new ExtendedProperties(new File(filename));
             p.load();
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
             BORDER_RANGE = p.getInt("BorderRange", 1000);
-            BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAR") ? 2 : 1);
+            BORDER_RANGE_X = p.getInt("BorderRangeX", 1000);
+            BORDER_RANGE_Z = p.getInt("BorderRangeZ", 1000);
+            BORDER_TYPE = getBorderType(p.getProperty("BorderShape", "CUBOID"));
             BORDER_USE_SPAWN = p.getBool("BorderUseSpawn", true);
             if(!BORDER_USE_SPAWN) {
                 try {
@@ -228,6 +240,7 @@ public class WorldConfig {
             TREE_GROWTH_ENABLED = p.getBool("TreeGrowthEnabled", true);
             
             PHYSICS_ENABLED             = p.getBool("PhysicsEnabled", true);
+            ENDERMAN_ENABLED = p.getBool("EndermanEnabled", true);
 
             ICE_MELT_ENABLED = p.getBool("IceMeltEnabled", true);
             SNOW_MELT_ENABLED = p.getBool("SnowMeltEnabled", true);
@@ -652,6 +665,14 @@ public class WorldConfig {
                 if(range > this.BORDER_RANGE)
                     return true;
                 
+                return false;
+            case 3:
+                // The region is Cuboid, so we can simply calculate if the player is outside the border.
+                if(locz > (z+this.BORDER_RANGE_Z) || locz < (z-this.BORDER_RANGE_Z))
+                    return true;
+                if(locx > (x+this.BORDER_RANGE_X) || locx < (x-this.BORDER_RANGE_X))
+                    return true;
+
                 return false;
             default:
                 return false;

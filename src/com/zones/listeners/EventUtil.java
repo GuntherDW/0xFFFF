@@ -118,7 +118,7 @@ public class EventUtil {
             }
         } else {
             if(!((ZoneNormal)zone).canModify(player, Rights.HIT)) {
-                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITIES_IN_ZONE, player);
                 event.setCancelled(true);
                 return;
             }
@@ -163,6 +163,8 @@ public class EventUtil {
                 player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
             else if (blockType == Material.NOTE_BLOCK.getId())
                 player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
+            else if (blockType == Material.HOPPER.getId())
+                player.sendMessage(ChatColor.RED + "You cannot change hoppers in this world!");
             
             event.setCancelled(true);
             return;
@@ -180,6 +182,8 @@ public class EventUtil {
                     player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
                 else if (blockType == Material.NOTE_BLOCK.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
+                else if (blockType == Material.HOPPER.getId())
+                    player.sendMessage(ChatColor.RED + "You cannot change hoppers in this world!");
                 
                 event.setCancelled(true);
                 return;
@@ -227,7 +231,7 @@ public class EventUtil {
                     return;
                 }
                 int typeId = block.getTypeId();
-                if((typeId == Material.FURNACE.getId() || typeId == Material.CHEST.getId() || typeId == Material.DISPENSER.getId()) &&
+                if((typeId == Material.FURNACE.getId() || typeId == Material.TRAPPED_CHEST.getId() || typeId == Material.HOPPER.getId() || typeId == Material.CHEST.getId() || typeId == Material.DISPENSER.getId()) &&
                         !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, typeId)) {
                     zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_CHEST_IN_ZONE, player);
                     event.setCancelled(true);

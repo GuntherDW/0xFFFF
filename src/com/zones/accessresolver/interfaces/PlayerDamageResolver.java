@@ -6,5 +6,5 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import com.zones.model.ZoneBase;
 
 public interface PlayerDamageResolver extends Resolver{
-    public boolean isAllowed(ZoneBase zone, Player player, DamageCause type, int damage);
+    public boolean isAllowed(ZoneBase zone, Player player, DamageCause type, double damage);
 }

@@ -36,7 +36,7 @@ public class ZonesConfig {
     public static final String PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot change blocks in zone '{zname}' !";
     public static final String PLAYER_CANT_DESTROY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot destroy blocks in zone '{zname}' !";
     public static final String PLAYER_CANT_HIT_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot trigger blocks in zone '{zname}' !";
-    public static final String PLAYER_CANT_HIT_ENTITYS_IN_ZONE = ChatColor.RED + "You cannot hit entities in zone '{zname}' !";
+    public static final String PLAYER_CANT_HIT_ENTITIES_IN_ZONE = ChatColor.RED + "You cannot hit entities in zone '{zname}' !";
     public static final String PLAYER_CANT_ATTACK_ENTITYS_IN_ZONE = ChatColor.RED + "You cannot attack entities in zone '{zname}' !";
     public static final String PLAYER_CANT_PICKUP_ITEMS_IN_ZONE = ChatColor.RED + "You're not allowed to drop items in zone '{zname}'!";
     public static final String PLAYER_CANT_DROP_ITEMS_IN_ZONE = ChatColor.RED + "You're not allowed to pickup items in '{zname}'!";
@@ -57,7 +57,7 @@ public class ZonesConfig {
     
     public static final String PLAYER_REACHED_BORDER = ChatColor.RED + "You have reached the border.";
     public static final String PLAYER_CANT_WARP_OUTSIDE_BORDER = ChatColor.RED + "You cannot warp outside the border.";
-    public static final String PLAYER_ILLIGAL_POSITION = ChatColor.RED + "You were moved to spawn because you were in an illegal position!";
+    public static final String PLAYER_ILLEGAL_POSITION = ChatColor.RED + "You were moved to spawn because you were in an illegal position!";
     
     public static final String BLOCK_IS_BLACKLISTED = ChatColor.RED + "This block type is protected in zone '{zname}' !";
     public static final String BLOCK_IS_PROTECTED = ChatColor.RED + "This block type is blacklisted in zone '{zname}' !";

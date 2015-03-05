@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -24,6 +25,7 @@ public class TexturePackManager {
 
     private Map<String, byte[]> texturePacks        = new HashMap<String, byte[]>();
     private Map<String, Long> texturePacks_checkSum = new HashMap<String, Long>();
+    private Logger log = Logger.getLogger("Minecraft");
 
     private Zones plugin;
 
@@ -38,6 +40,7 @@ public class TexturePackManager {
 
         File pluginFolder = plugin.getDataFolder();
         File texturepackFolder = new File(pluginFolder, getTag());
+        log.info("[Zones] Checking for "+texturepackFolder.getAbsolutePath());
         if(!texturepackFolder.exists())  return;
         
         for(File inputFile : texturepackFolder.listFiles()) {
@@ -53,6 +56,7 @@ public class TexturePackManager {
                 checksum.update(fileData, 0, fileData.length);
                 long texpackCRC32 = checksum.getValue();
 
+                log.info("[Zones] Added "+texpackName+" with checksum "+texpackCRC32);
                 texturePacks.put(texpackName, fileData);
                 texturePacks_checkSum.put(texpackName, texpackCRC32);
             } catch(Exception e) {

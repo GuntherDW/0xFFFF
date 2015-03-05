@@ -10,7 +10,7 @@ import com.zones.model.settings.ZoneVar;
 public class NormalPlayerDamageResolver implements PlayerDamageResolver {
 
     @Override
-    public boolean isAllowed(ZoneBase zone, Player player, DamageCause type, int damage) {
+    public boolean isAllowed(ZoneBase zone, Player player, DamageCause type, double damage) {
         return zone.getFlag(ZoneVar.HEALTH);
     }
 

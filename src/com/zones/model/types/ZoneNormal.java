@@ -20,21 +20,21 @@ import com.zones.persistence.Zone;
 import com.zones.util.Point;
 
 /**
- * 
+ *
  * @author Meaglin
  *
  */
-public class ZoneNormal extends ZoneBase{
+public class ZoneNormal extends ZoneBase {
     protected List<String>                 adminusers;
 
     protected HashMap<String, ZonesAccess> groups;
     protected HashMap<String, ZonesAccess> users;
-    
+
     private static final Resolver[] resolvers;
-    
+
     // We don't want to make a new list every time we need a default empty array.
     public static final List<Integer> emptyIntList = new ArrayList<Integer>();
-    
+
     static {
         resolvers = new Resolver[AccessResolver.size()];
         resolvers[AccessResolver.DYNAMITE.ordinal()]        = new NormalBlockResolver(ZoneVar.DYNAMITE);
@@ -44,6 +44,8 @@ public class ZoneNormal extends ZoneBase{
         resolvers[AccessResolver.ICE_FORM.ordinal()]        = new NormalBlockResolver(ZoneVar.ICE_FORM);
         resolvers[AccessResolver.ICE_MELT.ordinal()]        = new NormalBlockResolver(ZoneVar.ICE_MELT);
         resolvers[AccessResolver.MUSHROOM_SPREAD.ordinal()] = new NormalBlockResolver(ZoneVar.MUSHROOM_SPREAD);
+        resolvers[AccessResolver.MOBSFRIENDLYFIRE.ordinal()]= new NormalBlockResolver(ZoneVar.MOBSFRIENDLYFIRE);
+        resolvers[AccessResolver.ENDERMAN.ordinal()]        = new NormalBlockResolver(ZoneVar.ENDERMAN);
         resolvers[AccessResolver.PHYSICS.ordinal()]         = new NormalBlockResolver(ZoneVar.PHYSICS);
         resolvers[AccessResolver.DYNAMITE.ordinal()]        = new NormalBlockResolver(ZoneVar.DYNAMITE);
         resolvers[AccessResolver.LAVA_FLOW.ordinal()]       = new NormalBlockFromToResolver(ZoneVar.WATER);
@@ -61,7 +63,7 @@ public class ZoneNormal extends ZoneBase{
         resolvers[AccessResolver.PLAYER_TELEPORT.ordinal()]         = new NormalPlayerTeleportResolver();
         resolvers[AccessResolver.PLAYER_RECEIVE_DAMAGE.ordinal()]   = new NormalPlayerDamageResolver();
     }
-    
+
     public ZoneNormal() {
         super();
         adminusers = new ArrayList<String>();
@@ -73,7 +75,7 @@ public class ZoneNormal extends ZoneBase{
     public Permissions getPermissions() {
         return getPlugin().getPermissions();
     }
-    
+
     @Override
     protected void onLoad(Zone persistence) {
         super.onLoad(persistence);
@@ -123,7 +125,7 @@ public class ZoneNormal extends ZoneBase{
             }
         }
     }
-    
+
     public boolean canModify(Player player, ZonesAccess.Rights right) {
 
         ZonesAccess z = users.get(player.getName().toLowerCase());
@@ -132,13 +134,13 @@ public class ZoneNormal extends ZoneBase{
 
         if(this.getFlag(ZoneVar.INHERIT_GROUP)) {
             List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
-            
+
             for (Entry<String, ZonesAccess> e : groups.entrySet())
                 if (e.getValue().canDo(right)) {
                     if(e.getKey().equals("default"))
                         return true;
                     //if(getPermissions().inGroup(player, e.getKey().toLowerCase()));
-                    if (pgroups!= null && pgroups.contains(e.getKey().toLowerCase())) { 
+                    if (pgroups!= null && pgroups.contains(e.getKey().toLowerCase())) {
                         return true;
                     }
                 }
@@ -226,10 +228,38 @@ public class ZoneNormal extends ZoneBase{
         return rt;
     }
 
-    private String adminsToString() {
+    public String adminsToString() {
         String rt = "";
 
         for (String t : adminusers)
+            rt += t + ", ";
+
+        if (rt.equals(""))
+            return "";
+
+        rt = rt.substring(0, rt.length() - 2);
+
+        return rt;
+    }
+
+    public String usersToString() {
+        String rt = "";
+
+        for (String t : users.keySet())
+            rt += t + ", ";
+
+        if (rt.equals(""))
+            return "";
+
+        rt = rt.substring(0, rt.length() - 2);
+
+        return rt;
+    }
+
+    public String groupsToString() {
+        String rt = "";
+
+        for (String t : groups.keySet())
             rt += t + ", ";
 
         if (rt.equals(""))
@@ -331,7 +361,7 @@ public class ZoneNormal extends ZoneBase{
     public void addGroup(String groupname, String access) {
         addGroup(groupname, new ZonesAccess(access));
     }
-    
+
     @Override
     public void onEnter(Player player, Location to) {
         ZoneBase zone = zones.getWorldManager(to).getActiveZone(to);
@@ -366,7 +396,7 @@ public class ZoneNormal extends ZoneBase{
     public void onExit(Player player, Location to) {
         String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, (String)ZoneVar.LEAVE_MESSAGE.getDefault(this));
         sendMarkupMessage(message, player);
-        
+
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
             for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(insidePlayer)) {
@@ -380,12 +410,13 @@ public class ZoneNormal extends ZoneBase{
             String texturepack = zone == null ? null : (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
             getPlugin().newTexture(player, texturepack);
         }
+
     }
-    
+
     @Override
     public Location getSpawnLocation(Player player) {
         Object o = getSettings().get(ZoneVar.SPAWN_LOCATION);
-        if(o == null) { 
+        if(o == null) {
             return null;
         } else {
             Point p = (Point)o;

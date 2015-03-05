@@ -5,5 +5,3 @@ authors: [ 'Meaglin', 'Mysteryman', 'GunterDW' ]
 softdepend: [ 'EasyBind' ] 
 website: https://github.com/Meaglin/0xFFFF
 description: The Over optimized Area Protection tool with integrated Anti Grief options.
-commands:
-     
