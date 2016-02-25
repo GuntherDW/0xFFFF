@@ -44,7 +44,7 @@ public class ZonesVehicleListener implements Listener {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITIES_IN_ZONE, player);
             event.setCancelled(true);
         }
-        if (zone != null && event.getVehicle() instanceof StorageMinecart && !((PlayerHitEntityResolver) zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, event.getVehicle(), -1)) {
+        if (zone != null && event.getVehicle() instanceof StorageMinecart && !((PlayerHitEntityResolver) zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, event.getVehicle(), -1)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_CHEST_IN_ZONE, player);
             event.setCancelled(true);
         }
